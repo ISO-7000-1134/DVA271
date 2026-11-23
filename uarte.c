@@ -3,12 +3,6 @@
 nrfx_uarte_t uarte0_instance = NRFX_UARTE_INSTANCE(0);
 nrfx_uarte_t uarte1_instance = NRFX_UARTE_INSTANCE(1);
 
-char getChar_uarte1() {
-    char c;
-    return c;
-}
-
-char tx_buffer[UARTE_TX_BUFFER_SIZE];
 char uarte0_rx_buffer;
 char uarte1_rx_buffer;
 void uarte0_handler(nrfx_uarte_event_t const *p_event, void *p_context) {
@@ -50,8 +44,7 @@ void uarte_init() {
 
     errr = nrfx_uarte_init(&uarte1_instance, &config1, uarte1_handler);
     /*if (errr != 0){
-        sprintf("UARTE1 failed to initialize\n\r", tx_buffer, UARTE_TX_BUFFER_SIZE);
-        uarte0_write(tx_buffer, strlen(tx_buffer));
+    
     }*/
 
     NVIC_ClearPendingIRQ(NRFX_IRQ_NUMBER_GET(NRF_UARTE_INST_GET(0)));
@@ -81,4 +74,23 @@ char uarte1_read() {
     char c = uarte1_rx_buffer;
     uarte1_rx_buffer = '\0';
     return c;
+}
+
+void uart_bb_tx(uint32_t pin, uint8_t data, float baudrate) {
+    float period = SystemCoreClock / baudrate;
+    float t0 = dwt_get_cycle();// + period/2;
+
+    // Start bit
+    nrf_gpio_pin_write(pin, 0);
+
+    for(int i = 0; i < 8; i++) {
+        dwt_delay_until_cycle(t0 + period * (i + 1));
+        nrf_gpio_pin_write(pin, (data & (1 << i)) != 0);
+    }
+
+    // Stop bit
+    dwt_delay_until_cycle(t0 + period * 9);
+    nrf_gpio_pin_write(pin, 1);
+    
+    dwt_delay_until_cycle(t0 + period * 10);
 }
