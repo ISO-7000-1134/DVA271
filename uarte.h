@@ -22,14 +22,15 @@
 #define PIN_TXD1 37 // P1.04
 #define PIN_RXD1 39 // P1.05
 
-#define UARTE1_RX_BUFFER_SIZE 100
+#define UARTE_RX_BUFFER_SIZE 100
 #define UARTE_TX_BUFFER_SIZE 100
 
 void uarte_init();
 
-void uarte0_write(char* string, size_t stringLength);
+void uarte0_write(char* tx_buffer, size_t bufferSize);
+char uarte0_read();
 
-void uarte1_write(char* string, size_t stringLength);
-void uarte1_read(char* rx_buffer, size_t bufferSize);
+void uarte1_write(char* tx_buffer, size_t bufferSize);
+char uarte1_read();
 
 #endif
